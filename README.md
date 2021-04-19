@@ -17,7 +17,9 @@ Use browser to re-copy a web page
 
 ## Usage 🚀
 - Step 4: Run and wait for the magic to happen
+
 `source venv/bin/activate`
+
 `python3 main.py`
 
 ## Requirements to script service install
