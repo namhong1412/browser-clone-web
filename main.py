@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
-__author__ = "Hong Nguyen Nam"
-__copyright__ = "Copyright 2021, The Browser Clone"
-__license__ = "GPL"
-__version__ = "1.0.0"
-__maintainer__ = "Hong Nguyen Nam"
-__email__ = "a2FpdG9raWQxNDEyLmNvbmFuQGdtYWlsLmNvbQ=="
-__path_driver__ = 'chromedriver'
+# __author__ = "Hong Nguyen Nam"
+# __copyright__ = "Copyright 2021, The Browser Clone"
+# __license__ = "GPL"
+# __version__ = "1.0.0"
+# __maintainer__ = "Hong Nguyen Nam"
+# __email__ = "a2FpdG9raWQxNDEyLmNvbmFuQGdtYWlsLmNvbQ=="
+__path_driver__ = '/Users/Hacker1945/Desktop/clone_web/chromedriver'
+__black_list_type__ = ['.php']
+__status_code__ = [200, 404]
+__clone_all__ = False
+__zip__ = False
+__clone_url__ = 'https://demos.creative-tim.com/rubik/houses.html'
+
 
 from seleniumwire import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -19,6 +25,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+from zipfile36 import ZipFile
 
 
 class File():
@@ -45,12 +52,13 @@ class File():
         info_url = self.extract_info_url(url)
         if url == self.url:
             info_url = self.extract_info_url(url, True)
-        path_file = info_url['path'] + info_url['file_name']
-        if os.path.exists(path_file) == False:
-            r = requests.get(url)
-            os.makedirs(os.path.dirname(path_file), exist_ok=True)
-            with open(path_file, 'wb') as f:
-                f.write(r.content)
+        if info_url['file_name'][-4:] not in __black_list_type__:
+            path_file = info_url['path'] + info_url['file_name']
+            if os.path.exists(path_file) == False:
+                r = requests.get(url)
+                os.makedirs(os.path.dirname(path_file), exist_ok=True)
+                with open(path_file, 'wb') as f:
+                    f.write(r.content)
 
 
     def check_invalid(self, file_name):
@@ -73,7 +81,6 @@ class File():
     
     
     def get_href_a_tag(self, pagesource):
-        print('Get all link clone...')
         result = []
         source = BeautifulSoup(pagesource,'html.parser')
         try:
@@ -95,17 +102,41 @@ class File():
                         if text != '':
                             link = link.replace(str(text)+'/', '')
                     result.append(link + href.replace('../', ''))
+                elif href[:1] == '/':
+                    link = re.split('[\/]+', self.info_url['url'])[:2]
+                    link = str(link[0]) + '//' + str(link[1])
+                    result.append(link + href)
                 else:
                     result.append(self.info_url['url'] + href)
             if domain == self.info_url['domain']:
                 result.append(href)
-        print('Get all link clone done!')
         return result
 
+    
+    def get_all_file_paths(self, directory):
+        file_paths = []
+        for root, directories, files in os.walk(directory):
+            for filename in files:
+                filepath = os.path.join(root, filename)
+                file_paths.append(filepath)
+        return file_paths  
+
+
+    def zip(self, path_folder):
+        print('Begin zipped file '+ str(path_folder) + '.zip')
+        directory = path_folder
+        file_paths = self.get_all_file_paths(directory)
+        with ZipFile(path_folder + '.zip','w') as zip:
+            for file in file_paths:
+                zip.write(file)
+        print('All files zipped successfully!')
+    
 
 class BrowserClone(File):
     driver = ''
     page_source = ''
+    all_tab = []
+    url_down = []
     
     
     def __init__(self, url):
@@ -125,23 +156,56 @@ class BrowserClone(File):
         self.page_source = self.driver.page_source
         super().__init__(self.url)
         self.extract_file()
+        print('Get all link clone...')
         url_tab_data = super().get_href_a_tag(self.page_source)
-        print('Start clone...')
-        with tqdm(total=len(url_tab_data)) as pbar:
-            for url in url_tab_data:
+        for url_tab in url_tab_data:
+            self.all_tab.append(url_tab)
+            self.extract_html(url_tab)
+        
+        
+        # clone options 
+        if __clone_all__ == True:
+            data = list(set(self.all_tab))
+            for url in data:
                 self.driver.get(url)
                 self.extract_file()
-                pbar.update(1)
-        print('Clone done!')
+
+
+        print('Get all link clone done!')
+        print('Save files...')
+        self.extract_file(True)
+        print('Save files Done!')
+
+
+        if __zip__ == True:
+            print('Begin zip file...')
+            super().zip('demoscreative-timcom')
+            print('Zip folder done!')
         print('============================== End Game ==============================')
 
+    
+    def extract_html(self, url):
+        super().__init__(url)
+        self.driver.get(url)
+        self.page_source = self.driver.page_source
+        url_tab_data = super().get_href_a_tag(self.page_source)
+        for url_tab in url_tab_data:
+            self.all_tab.append(url_tab)
+    
 
-    def extract_file(self):
-        super().__init__(self.url)
+    def extract_file(self, down = False):
         for request in self.driver.requests:
             if request.response:
-                if super().check_exists(request.url) and request.response.status_code == 200:
-                    super().download_file(request.url)
+                if request.response.status_code in __status_code__ and request.url not in self.url_down:
+                    self.url_down.append(request.url)
+        if down == True:
+            super().__init__(self.url)
+            data = list(set(self.url_down))
+            with tqdm(total=len(data)) as pbar:
+                for file in data:
+                    if super().check_exists(file):
+                        super().download_file(file)
+                    pbar.update(1)
 
 
-BrowserClone('https://demos.creative-tim.com/argon-dashboard-pro/pages/dashboards/dashboard.html')
+BrowserClone(__clone_url__)
