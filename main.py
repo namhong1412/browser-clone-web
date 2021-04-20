@@ -41,17 +41,6 @@ class File():
         return {"domain": domain, "path": path_file, "file_name": file_name, "scheme": scheme, "url": url_ori}
 
 
-    def create_html(self, html):
-        file_name = self.info_url['file_name']
-        if self.info_url['file_name'] == '/':
-            file_name  = '/index.html'
-        path_file = self.info_url['path'] + self.info_url['file_name']
-        if os.path.exists(path_file) == False:
-            os.makedirs(os.path.dirname(self.info_url['path']), exist_ok=True)
-            with open(path_file, 'w+', encoding = 'utf-8') as f:
-                f.write(html)
-
-
     def download_file(self, url):
         info_url = self.extract_info_url(url)
         if url == self.url:
@@ -95,11 +84,19 @@ class File():
         for a in data_a:
             if a.get('href') != '' and a.get('href') != '#' and str(a.get('href')) not in a_tag_list and self.check_invalid(str(a.get('href'))) != None:
                 a_tag_list.append(a.get('href'))
-        
+
         for href in a_tag_list:
-            domain = urlparse(a.get('href')).netloc
+            domain = urlparse(href).netloc
             if domain == '':
-                result.append(self.info_url['url'] + href)
+                if len(href.split('../')) > 1:
+                    cut = self.info_url['url'].split('/')[-(len(href.split('../'))):]
+                    link = self.info_url['url']
+                    for text in cut:
+                        if text != '':
+                            link = link.replace(str(text)+'/', '')
+                    result.append(link + href.replace('../', ''))
+                else:
+                    result.append(self.info_url['url'] + href)
             if domain == self.info_url['domain']:
                 result.append(href)
         print('Get all link clone done!')
@@ -147,4 +144,4 @@ class BrowserClone(File):
                     super().download_file(request.url)
 
 
-BrowserClone('http://www.themenate.net/enlink-bs/dist/index.html')
+BrowserClone('https://demos.creative-tim.com/argon-dashboard-pro/pages/dashboards/dashboard.html')
