@@ -5,12 +5,12 @@
 # __version__ = "1.0.0"
 # __maintainer__ = "Hong Nguyen Nam"
 # __email__ = "a2FpdG9raWQxNDEyLmNvbmFuQGdtYWlsLmNvbQ=="
-__path_driver__ = '/Users/Hacker1945/Desktop/clone_web/chromedriver'
+__path_driver__ = 'chromedriver'
 __black_list_type__ = ['.php']
 __status_code__ = [200, 404]
 __clone_all__ = False
 __zip__ = False
-__clone_url__ = 'https://demos.creative-tim.com/rubik/houses.html'
+__clone_url__ = 'https://pixinvent.com/demo/vuexy-html-bootstrap-admin-template/html/ltr/vertical-menu-template/index.html'
 
 
 from seleniumwire import webdriver
@@ -26,9 +26,11 @@ import re
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from zipfile36 import ZipFile
+import shutil
 
 
 class File():
+    info_url = ''
     def __init__(self, url):
         self.url = url
         self.info_url = self.extract_info_url(url, True)
@@ -49,11 +51,16 @@ class File():
 
 
     def download_file(self, url):
+        black_list = ['', '/']
         info_url = self.extract_info_url(url)
         if url == self.url:
             info_url = self.extract_info_url(url, True)
+        
         if info_url['file_name'][-4:] not in __black_list_type__:
-            path_file = info_url['path'] + info_url['file_name']
+            file_name = info_url['file_name']
+            if info_url['file_name'] in black_list:
+                file_name = 'index.html'
+            path_file = info_url['path'] + file_name
             if os.path.exists(path_file) == False:
                 r = requests.get(url)
                 os.makedirs(os.path.dirname(path_file), exist_ok=True)
@@ -176,11 +183,14 @@ class BrowserClone(File):
         self.extract_file(True)
         print('Save files Done!')
 
-
         if __zip__ == True:
-            print('Begin zip file...')
-            super().zip('demoscreative-timcom')
-            print('Zip folder done!')
+            url_info = super().extract_info_url(self.url, True)
+            folder = './' + url_info['domain'].replace('.', '')
+            super().zip(folder)
+            try:
+                shutil.rmtree(folder, ignore_errors=True)
+            except OSError as e:
+                print("Error: %s : %s" % (folder, e.strerror))
         print('============================== End Game ==============================')
 
     
