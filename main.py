@@ -5,7 +5,7 @@
 # __version__ = "2.1.0"
 # __maintainer__ = "Hong Nguyen Nam (Jeremy Nguyen)"
 # __email__ = "a2FpdG9raWQxNDEyLmNvbmFuQGdtYWlsLmNvbQ=="
-__path_driver__ = '/Users/Hacker1945/Desktop/clone-web/chromedriver'
+__path_driver__ = 'chromedriver'
 __black_list_type__ = ['.php']
 __status_code__ = [200, 404]
 __clone_all__ = False
