@@ -24,3 +24,4 @@ tqdm==4.60.0
 urllib3==1.26.4
 wsproto==1.0.0
 zipfile36
+webdriver_manager==3.8.5
