@@ -13,7 +13,7 @@ Use browser to re-copy a web page
 
 `pip3 install -r requirements.txt`
 
-- Step 3: Edit the main.py file in line 8 and line 13 to your path browser driver and the web you want to clone (this version using Chrome Driver 90.0.4430.24)
+- Step 3: Edit the main.py (edit the url you want to clone)
 
 ## Usage 🚀
 - Step 4: Run and wait for the magic to happen
@@ -25,7 +25,7 @@ Use browser to re-copy a web page
 ## Requirements to script service install
 - Python3, Pip3
 
-- Chrome, Firefox driver
+- Chrome
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
