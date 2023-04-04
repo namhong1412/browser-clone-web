@@ -34,7 +34,7 @@ def extract_info_url(url, main=False):
     scheme = data_url.scheme
     url_ori = url.replace(file_name, '')
     black_list = ['', '/']
-    if main == True and file_name in black_list:
+    if main is True and file_name in black_list:
         file_name = 'index.html'
     return {"domain": domain, "path": path_file, "file_name": file_name, "scheme": scheme, "url": url_ori}
 
@@ -95,7 +95,7 @@ class File:
         if info_url['domain'] != self.info_url['domain']:
             return False
         path_file = info_url['path'] + info_url['file_name']
-        return os.path.exists(path_file) == False
+        return os.path.exists(path_file) is False
 
     def get_all_urls_in_page(self, page_source):
         result = []
